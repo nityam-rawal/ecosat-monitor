@@ -1,0 +1,124 @@
+"""Docker Compose configuration for EcoSat Monitor."""
+
+version: "3.8"
+
+services:
+  # PostgreSQL Database with PostGIS
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: ecosat-db
+    environment:
+      POSTGRES_USER: ecosat
+      POSTGRES_PASSWORD: ecosat
+      POSTGRES_DB: ecosat
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecosat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: ecosat-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build: ./backend
+    container_name: ecosat-backend
+    command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+    environment:
+      DEBUG: "False"
+      DATABASE_URL: postgresql://ecosat:ecosat@db:5432/ecosat
+      REDIS_URL: redis://redis:6379/0
+      GEE_PROJECT_ID: ${GEE_PROJECT_ID:-}
+      GEE_SERVICE_ACCOUNT_JSON: ${GEE_SERVICE_ACCOUNT_JSON:-}
+      NASA_EARTHDATA_USER: ${NASA_EARTHDATA_USER:-}
+      NASA_EARTHDATA_PASS: ${NASA_EARTHDATA_PASS:-}
+      COPERNICUS_DSM_USER: ${COPERNICUS_DSM_USER:-}
+      COPERNICUS_DSM_PASS: ${COPERNICUS_DSM_PASS:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - tiles_data:/data/tiles
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Celery Worker for data ingestion
+  worker:
+    build: ./backend
+    container_name: ecosat-worker
+    command: celery -A pipeline.scheduler worker --loglevel=info
+    environment:
+      DEBUG: "False"
+      DATABASE_URL: postgresql://ecosat:ecosat@db:5432/ecosat
+      REDIS_URL: redis://redis:6379/0
+      GEE_PROJECT_ID: ${GEE_PROJECT_ID:-}
+      GEE_SERVICE_ACCOUNT_JSON: ${GEE_SERVICE_ACCOUNT_JSON:-}
+    depends_on:
+      - db
+      - redis
+      - backend
+    volumes:
+      - ./backend:/app
+      - ./pipeline:/pipeline
+
+  # Celery Beat Scheduler
+  scheduler:
+    build: ./backend
+    container_name: ecosat-scheduler
+    command: celery -A pipeline.scheduler beat --loglevel=info
+    environment:
+      DEBUG: "False"
+      DATABASE_URL: postgresql://ecosat:ecosat@db:5432/ecosat
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend:/app
+      - ./pipeline:/pipeline
+
+  # React Frontend
+  frontend:
+    build: ./frontend
+    container_name: ecosat-frontend
+    environment:
+      VITE_API_BASE_URL: http://backend:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+
+volumes:
+  postgres_data:
+  redis_data:
+  tiles_data:
+
+networks:
+  default:
+    name: ecosat-network
