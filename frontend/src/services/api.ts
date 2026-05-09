@@ -1,4 +1,4 @@
-"""Frontend API client service."""
+// Frontend API client service.
 
 import axios, { AxiosInstance } from "axios";
 import {
@@ -11,7 +11,7 @@ import {
   TimeseriesQueryParams,
 } from "@/types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = ((import.meta as any).env.VITE_API_BASE_URL as string | undefined) || "http://localhost:8000";
 
 class APIClient {
   private client: AxiosInstance;

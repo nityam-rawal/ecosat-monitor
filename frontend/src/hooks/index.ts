@@ -1,4 +1,4 @@
-"""React hooks for data fetching and state management."""
+// React hooks for data fetching and state management.
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";

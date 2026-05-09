@@ -1,4 +1,4 @@
-"""Frontend types and interfaces."""
+// Frontend types and interfaces.
 
 // API Response Types
 export interface AOI {

@@ -1,4 +1,4 @@
-"""Time slider component placeholder."""
+// Time slider component placeholder.
 
 export default function TimeSlider() {
   return (

@@ -1,4 +1,4 @@
-"""Map component with MapLibre GL JS."""
+// Map component with MapLibre GL JS.
 
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
@@ -16,7 +16,7 @@ export default function Map({ selectedAoiId, activeDataset }: MapProps) {
   const map = useRef<maplibregl.Map | null>(null);
   const [zoom, setZoom] = useState(5);
   const { data: datasets } = useDatasets();
-  const { data: latestData } = useLatestData();
+  const { data: latestData = {} } = useLatestData();
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -95,7 +95,7 @@ export default function Map({ selectedAoiId, activeDataset }: MapProps) {
       <div className="map-info">
         {latestData && activeDataset && (
           <div className="latest-info">
-            Latest {activeDataset}: {latestData[activeDataset]?.date || "N/A"}
+            Latest {activeDataset}: {(latestData as any)[activeDataset]?.date || "N/A"}
             {selectedAoiId ? ` | AOI ${selectedAoiId}` : ""} | Zoom {zoom}
           </div>
         )}

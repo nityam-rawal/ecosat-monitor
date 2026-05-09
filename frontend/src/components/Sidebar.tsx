@@ -1,4 +1,4 @@
-"""Sidebar component with controls and charts."""
+// Sidebar component with controls and charts.
 
 import { useAOIs, useTimeseries, useDatasets } from "@/hooks";
 import TimeseriesChart from "@/components/TimeseriesChart";

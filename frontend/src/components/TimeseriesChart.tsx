@@ -1,4 +1,4 @@
-"""Time-series chart component."""
+// Time-series chart component.
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { TimeseriesData } from "@/types";
@@ -33,7 +33,7 @@ export default function TimeseriesChart({ data, title }: TimeseriesChartProps) {
           />
           <YAxis tick={{ fontSize: 12 }} />
           <Tooltip
-            formatter={(value) => value.toFixed(2)}
+            formatter={(value: any) => typeof value === 'number' ? value.toFixed(2) : value}
             labelFormatter={(label) => new Date(label).toLocaleDateString()}
           />
           <Legend />

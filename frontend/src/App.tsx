@@ -1,4 +1,4 @@
-"""Main React App component."""
+// Main React App component.
 
 import { useState } from "react";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";

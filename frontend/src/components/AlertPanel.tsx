@@ -1,4 +1,4 @@
-"""Alert panel component."""
+// Alert panel component.
 
 import { useAlerts, useResolveAlert } from "@/hooks";
 import { Alert } from "@/types";
@@ -15,7 +15,7 @@ const SEVERITY_COLORS = {
 };
 
 export default function AlertPanel({ aoiId }: AlertPanelProps) {
-  const { data: alerts = [] } = useAlerts(aoiId);
+  const { data: alerts = [] } = useAlerts(aoiId || undefined);
   const { mutate: resolveAlert } = useResolveAlert();
 
   if (!aoiId) {

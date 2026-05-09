@@ -1,4 +1,4 @@
-"""Layer control component placeholder."""
+// Layer control component placeholder.
 
 export default function LayerControl() {
   return (

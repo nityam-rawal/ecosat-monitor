@@ -1,4 +1,4 @@
-"""AOI Manager component."""
+// AOI Manager component.
 
 import { useState } from "react";
 import { useCreateAOI, useDeleteAOI } from "@/hooks";
